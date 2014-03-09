@@ -102,6 +102,8 @@ class ReferenceInlineNC(NodeConverter):
                 else:
                     raise KeyError
             except KeyError:
+                if len(self.converter.doc) > 1:
+                    return False
                 self.msg(
                     'E100', node, (
                         key, node['_pos'][0], node['_pos'][1]
@@ -112,48 +114,64 @@ class ReferenceInlineNC(NodeConverter):
             for item in ref:
                 if item[0] != '_':
                     node[item] = ref[item]
+        return True
 
-    def convert(self, converter):
+    @staticmethod
+    def rename(node, tex_ref):
+        """Final stage in the conversion. """
+        del node['_pos']
+        if tex_ref is not None:
+            node.parent.insert_before(node.index, tex_ref)
+            del node.parent[node.index]
+        elif isinstance(node, core.Void):
+            node.name = 'img'
+            node.rename('_address', 'src')
+        else:
+            node.name = 'a'
+            node.rename('_address', 'href')
+
+    def convert(self):
         """Modifies the nodes caught by this node converter. """
-        ref_block_nc = converter['ReferenceBlockNC']
+        ref_block_nc = self.converter['ReferenceBlockNC']
         inline_ref = self.converter.document.namespace['inline_ref']
-        tex_ref = None
+        doc_level = len(self.converter.doc)
         for node in inline_ref:
+            tex_ref = None
             node['_address'] = ''
             if '_reference_id' in node:
-                self.update_node(
+                update = self.update_node(
                     node, ref_block_nc, '_reference_id'
                 )
-                del node['_reference_id']
+                if update or doc_level == 1:
+                    del node['_reference_id']
             else:
                 if isinstance(node, core.Void):
-                    self.update_node(
+                    update = self.update_node(
                         node, ref_block_nc, 'alt'
                     )
                 else:
                     if len(node) == 1 and node[0].name == '#text':
-                        label = self.update_node(
+                        update = self.update_node(
                             node, ref_block_nc, node[0].data
                         )
-                        if label:
-                            tex_ref = core.RawText('script', label)
+                        if isinstance(update, str):
+                            tex_ref = core.RawText('script', update)
                             tex_ref['type'] = "math/tex"
+                    elif doc_level > 1:
+                        update = False
                     else:
                         self.msg(
                             'E101', node, (
                                 node['_pos'][0], node['_pos'][1]
                             )
                         )
-            del node['_pos']
-            if tex_ref is not None:
-                node.parent.insert_before(node.index, tex_ref)
-                del node.parent[node.index]
-            elif isinstance(node, core.Void):
-                node.name = 'img'
-                node.rename('_address', 'src')
-            else:
-                node.name = 'a'
-                node.rename('_address', 'href')
+            if doc_level > 1 and update is False:
+                if 'uri' not in node:
+                    node['uri'] = node.owner.uri
+                namespace = self.converter.doc[-2].namespace
+                namespace['inline_ref'].append(node)
+                continue
+            self.rename(node, tex_ref)
 
 
 MSG = {

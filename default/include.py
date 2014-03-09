@@ -23,6 +23,10 @@ class IncludeNC(NodeConverter):
         self.converter.convert(pdoc)
         cdoc = self.converter.doc.pop()
         clog = self.converter.log.pop()
+        if plog:
+            self.converter.update_log(plog)
+        if clog:
+            self.converter.update_log(clog)
         node.parent.extend_before(node.index, cdoc)
         parent = node.parent
         index = node.index

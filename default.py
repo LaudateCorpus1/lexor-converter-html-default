@@ -9,7 +9,7 @@ parsed in html.
 from lexor import init, load_aux
 
 INFO = init(
-    version=(0, 0, 1, 'rc', 1),
+    version=(0, 0, 1, 'rc', 2),
     lang='lexor',
     to_lang='html',
     type='converter',
@@ -67,4 +67,4 @@ def init_conversion(_, doc):
 
 def convert(converter, _):
     """Evaluate the python embeddings. """
-    converter['ReferenceInlineNC'].convert(converter)
+    converter['ReferenceInlineNC'].convert()
