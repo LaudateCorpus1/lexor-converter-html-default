@@ -9,26 +9,17 @@ from lexor.core.elements import Element
 
 
 class StrongEmNC(NodeConverter):
-    """Append a strong_em or em_strong to a list. """
+    """Modify the `strong_em` and `em_strong` to proper html nodes."""
 
-    def __init__(self, converter):
-        NodeConverter.__init__(self, converter)
-        converter.strong_em = list()
-
-    def process(self, node):
-        self.converter.strong_em.append(node)
-
-    @staticmethod
-    def convert(converter):
-        """Modifies the nodes caught by this node converter. """
-        for node in converter.strong_em:
-            if node.name == 'strong_em':
-                node.name = 'strong'
-                tmp = Element('em')
-                tmp.extend_children(node)
-                node.append_child(tmp)
-            else:
-                node.name = 'em'
-                tmp = Element('strong')
-                tmp.extend_children(node)
-                node.append_child(tmp)
+    def end(self, node):
+        if node.name == 'strong_em':
+            node.name = 'strong'
+            tmp = Element('em')
+            tmp.extend_children(node)
+            node.append_child(tmp)
+        else:
+            node.name = 'em'
+            tmp = Element('strong')
+            tmp.extend_children(node)
+            node.append_child(tmp)
+        return node
