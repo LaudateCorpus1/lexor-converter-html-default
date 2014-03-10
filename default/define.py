@@ -33,9 +33,10 @@ class UndefineNC(NodeConverter):
             for key in keys:
                 if macro[key]['flag'] == 'set':
                     del macro[key]
-        data = node.data.split(',')
+        data = [item.strip() for item in node.data.split(',')]
         for item in data:
-            del macro[item.strip()]
+            if item in macro:
+                del macro[item]
         parent = node.parent
         index = node.index
         del node.parent[node.index]

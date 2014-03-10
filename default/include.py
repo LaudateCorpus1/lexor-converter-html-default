@@ -40,6 +40,13 @@ class IncludeNC(NodeConverter):
             info['parser_lang'] = name[1][1:]
         return info
 
+    def update_log(self, plog, clog):
+        """Helper function for the start method. """
+        if plog:
+            self.converter.update_log(plog)
+        if clog:
+            self.converter.update_log(clog)
+
     def start(self, node):
         if 'src' not in node:
             return remove_node(node)
@@ -52,7 +59,16 @@ class IncludeNC(NodeConverter):
         parser = Parser(info['parser_lang'],
                         info['parser_style'],
                         info['parser_defaults'])
-        parser.parse(text, info['src'])
+        try:
+            parser.parse(text, info['src'])
+        except IOError:
+            self.msg(
+                'E002', node, [
+                    info['parser_lang'],
+                    info['parser_style'],
+                ]
+            )
+            return remove_node(node)
         if info['convert'] == 'true' and info['convert_to'] is not None:
             if info['convert_from'] is None:
                 info['convert_from'] = info['parser_lang']
@@ -66,33 +82,45 @@ class IncludeNC(NodeConverter):
                                       info['convert_to'],
                                       info['convert_style'],
                                       info['convert_defaults'])
-            converter.convert(parser.doc)
+            try:
+                converter.convert(parser.doc)
+            except IOError:
+                self.msg(
+                    'E003', node, [
+                        info['convert_from'],
+                        info['convert_to'],
+                        info['convert_style'],
+                    ]
+                )
+                return remove_node(node)
             cdoc = converter.doc.pop()
             clog = converter.log.pop()
         else:
             cdoc = parser.doc
             clog = None
-        if parser.log:
-            self.converter.update_log(parser.log)
-        if clog:
-            self.converter.update_log(clog)
-
+        self.update_log(parser.log, clog)
         if info['adopt']:
             node.parent.extend_before(node.index, cdoc)
         else:
             node.parent.insert_before(node.index, cdoc)
-
         return remove_node(node)
 
 
 MSG = {
     'E001': 'file `{0}` not found',
+    'E002': 'parsing style not found {0}:{1}',
+    'E003': 'converting style not found [{0} ==> {1}:{2}]',
 }
 MSG_EXPLANATION = [
     """
     - Python was not able to open the file specified.
 
     Reports error E001.
+
+""", """
+    - Python was not able to find the specified converting style.
+
+    Reports error E002.
 
 """,
 ]
