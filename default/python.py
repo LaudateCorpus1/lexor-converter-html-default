@@ -1,6 +1,6 @@
 """LEXOR to HTML PYTHON NodeConverter
 
-Collect and execute python embeddings.
+Execute python embeddings.
 
 """
 
@@ -9,22 +9,19 @@ from lexor.core.parser import Parser
 
 
 class PythonNC(NodeConverter):
-    """Append a node with python instructions to a list. """
+    """Execute python embeddings. """
 
     def __init__(self, converter):
         NodeConverter.__init__(self, converter)
-        converter.python = list()
-
-    def process(self, node):
-        self.converter.python.append(node)
-
-    @staticmethod
-    def convert(converter):
-        """Execute the python embeddings. """
-        parser = Parser('html', 'default')
-        err = True
+        self.parser = Parser('html', 'default')
+        self.err = True
         if converter.defaults['error'] in ['off', 'false']:
-            err = False
-        if converter.defaults['exec'] in ['on', 'true']:
-            for num, node in enumerate(converter.python):
-                converter.exec_python(node, num, parser, err)
+            self.err = False
+        self.num = 0
+
+    def start(self, node):
+        self.num += 1
+        ctr = self.converter
+        if ctr.defaults['exec'] not in ['on', 'true']:
+            return node
+        return ctr.exec_python(node, self.num, self.parser, self.err)

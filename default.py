@@ -9,7 +9,7 @@ parsed in html.
 from lexor import init, load_aux
 
 INFO = init(
-    version=(0, 0, 1, 'rc', 2),
+    version=(0, 0, 1, 'rc', 3),
     lang='lexor',
     to_lang='html',
     type='converter',
@@ -42,7 +42,7 @@ REPOSITORY = [
     MOD['reference'].ReferenceInlineNC,
 ]
 MAPPING = {
-    #'?python': 'PythonNC',
+    '?python': 'PythonNC',
     'strong_em': 'StrongEmNC',
     'em_strong': 'StrongEmNC',
     'p': 'ParagraphNC',
