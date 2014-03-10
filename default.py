@@ -9,7 +9,7 @@ parsed in html.
 from lexor import init, load_aux
 
 INFO = init(
-    version=(0, 0, 1, 'rc', 4),
+    version=(0, 0, 1, 'rc', 5),
     lang='lexor',
     to_lang='html',
     type='converter',
@@ -51,7 +51,7 @@ MAPPING = {
     'reference': 'ReferenceInlineNC',
     'latex': 'LatexNC',
     'equation': 'LatexEnvironNC',
-    #'align': 'LatexEnvironNC', # todo: figure out subequations
+    'align': 'LatexEnvironNC',
     'figure': 'FigureNC',
     'define': 'DefineNC',
     'undef': 'UndefineNC',
