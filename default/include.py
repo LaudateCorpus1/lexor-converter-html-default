@@ -42,9 +42,13 @@ class IncludeNC(NodeConverter):
 
     def start(self, node):
         if 'src' not in node:
-            return
+            return remove_node(node)
         info = self.get_info(node)
-        text = open(info['src'], 'r').read()
+        try:
+            text = open(info['src'], 'r').read()
+        except IOError:
+            self.msg('E001', node, [info['src']])
+            return remove_node(node)
         parser = Parser(info['parser_lang'],
                         info['parser_style'],
                         info['parser_defaults'])
@@ -79,3 +83,16 @@ class IncludeNC(NodeConverter):
             node.parent.insert_before(node.index, cdoc)
 
         return remove_node(node)
+
+
+MSG = {
+    'E001': 'file `{0}` not found',
+}
+MSG_EXPLANATION = [
+    """
+    - Python was not able to open the file specified.
+
+    Reports error E001.
+
+""",
+]
