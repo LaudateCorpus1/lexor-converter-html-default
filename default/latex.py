@@ -2,8 +2,14 @@
 
 """
 
-from lexor.core.converter import NodeConverter, get_converter_namespace
+from lexor.core.converter import NodeConverter
+from lexor.core.converter import get_converter_namespace
 from lexor.core.elements import RawText
+
+
+class LatexPINC(NodeConverter):
+    """Remove latex processing instructions. """
+    copy = False
 
 
 class LatexNC(NodeConverter):

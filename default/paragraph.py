@@ -16,10 +16,4 @@ class ParagraphNC(NodeConverter):
         if 'remove' not in node:
             return node
         node.parent.extend_before(node.index, node)
-        index = node.index
-        parent = node.parent
-        del node.parent[node.index]
-        try:
-            return parent[index]
-        except IndexError:
-            return parent[index-1]
+        return self.converter.remove_node(node)

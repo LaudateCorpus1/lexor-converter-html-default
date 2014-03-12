@@ -5,7 +5,7 @@
 import os
 import os.path as pth
 from lexor.core.parser import Parser
-from lexor.core.converter import Converter, remove_node
+from lexor.core.converter import Converter
 from lexor.core.converter import NodeConverter
 
 
@@ -49,13 +49,13 @@ class IncludeNC(NodeConverter):
 
     def start(self, node):
         if 'src' not in node:
-            return remove_node(node)
+            return Converter.remove_node(node)
         info = self.get_info(node)
         try:
             text = open(info['src'], 'r').read()
         except IOError:
             self.msg('E001', node, [info['src']])
-            return remove_node(node)
+            return Converter.remove_node(node)
         parser = Parser(info['parser_lang'],
                         info['parser_style'],
                         info['parser_defaults'])
@@ -68,7 +68,7 @@ class IncludeNC(NodeConverter):
                     info['parser_style'],
                 ]
             )
-            return remove_node(node)
+            return Converter.remove_node(node)
         if info['convert'] == 'true' and info['convert_to'] is not None:
             if info['convert_from'] is None:
                 info['convert_from'] = info['parser_lang']
@@ -92,7 +92,7 @@ class IncludeNC(NodeConverter):
                         info['convert_style'],
                     ]
                 )
-                return remove_node(node)
+                return Converter.remove_node(node)
             cdoc = converter.doc.pop()
             clog = converter.log.pop()
         else:
@@ -103,7 +103,7 @@ class IncludeNC(NodeConverter):
             node.parent.extend_before(node.index, cdoc)
         else:
             node.parent.insert_before(node.index, cdoc)
-        return remove_node(node)
+        return Converter.remove_node(node)
 
 
 MSG = {

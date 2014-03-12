@@ -23,10 +23,10 @@ class FigureNC(NodeConverter):
         self.num += 1
         caption.append_child('Figure %d: ' % self.num)
         caption.extend_children(node)
-        image = core.Void('img')
         if 'src' in node:
+            image = core.Void('img')
             image['src'] = node['src']
             del node['src']
-        node.append_child(image)
+            node.append_child(image)
         node.append_child(caption)
         return node
