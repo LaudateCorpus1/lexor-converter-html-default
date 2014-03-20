@@ -47,13 +47,33 @@ class IncludeNC(NodeConverter):
         if clog:
             self.converter.update_log(clog)
 
+    @staticmethod
+    def get_text(info, node):
+        """Obtain the text. """
+        try:
+            text = open(info['src'], 'r').read()
+            return text
+        except IOError:
+            if 'search' not in node:
+                return None
+        try:
+            lexorinputs = os.environ['LEXORINPUTS']
+        except KeyError:
+            return None
+        for directory in lexorinputs.split(':'):
+            path = '%s/%s' % (directory, node['src'])
+            try:
+                return open(path, 'r').read()
+            except IOError:
+                pass
+        return None
+
     def start(self, node):
         if 'src' not in node:
             return Converter.remove_node(node)
         info = self.get_info(node)
-        try:
-            text = open(info['src'], 'r').read()
-        except IOError:
+        text = self.get_text(info, node)
+        if text is None:
             self.msg('E001', node, [info['src']])
             return Converter.remove_node(node)
         parser = Parser(info['parser_lang'],
@@ -61,7 +81,7 @@ class IncludeNC(NodeConverter):
                         info['parser_defaults'])
         try:
             parser.parse(text, info['src'])
-        except IOError:
+        except ImportError:
             self.msg(
                 'E002', node, [
                     info['parser_lang'],
@@ -84,7 +104,7 @@ class IncludeNC(NodeConverter):
                                       info['convert_defaults'])
             try:
                 converter.convert(parser.doc)
-            except IOError:
+            except ImportError:
                 self.msg(
                     'E003', node, [
                         info['convert_from'],
@@ -100,8 +120,10 @@ class IncludeNC(NodeConverter):
             clog = None
         self.update_log(parser.log, clog)
         if info['adopt']:
+            cdoc.temporary = True
             node.parent.extend_before(node.index, cdoc)
         else:
+            cdoc.temporary = False
             node.parent.insert_before(node.index, cdoc)
         return Converter.remove_node(node)
 

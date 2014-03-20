@@ -11,9 +11,12 @@ class EntityNC(NodeConverter):
     """Replace special symbols. """
     val = {
         "'": '&rsquo;',
+        "<": '&lt;'
     }
 
     def start(self, node):
+        if node.data[0] == '\\':
+            node.data = node.data[1:]
         if node.data in self.val:
             node.data = self.val[node.data]
         return node

@@ -4,8 +4,27 @@
 
 import os
 from imp import load_source
-from lexor.core.converter import NodeConverter
-from lexor.core.elements import DocumentType, Element
+from lexor.core import NodeConverter, DocumentType, Element
+
+
+def find_element(name, node, index=0, **keywords):
+    """Looks for an element in the node children. If it is not found,
+    a new element is created and placed before the specified index.
+    """
+    result = None
+    for ele in node.child:
+        if ele.name.lower() == name:
+            result = ele
+            break
+    if result is None and keywords.get('insert', True):
+        args = keywords.get('args', None)
+        etype = keywords.get('etype', Element)
+        if args is None:
+            result = etype(name)
+        else:
+            result = etype(*args)
+        node.insert_before(index, result)
+    return result
 
 
 class DocumentClassNC(NodeConverter):
@@ -17,34 +36,34 @@ class DocumentClassNC(NodeConverter):
         self.num += 1
         if self.num > 1:
             self.msg('E001', node)
-        newnode = DocumentType('html')
-        node.parent.insert_before(node.index, newnode)
-        del node.parent[node.index]
-        self.ref = newnode
-        return newnode
+        document = node.owner
+        self.ref = find_element(
+            '#doctype', document, 0, etype=DocumentType, args=['html']
+        )
+        return self.converter.remove_node(node)
 
     def convert(self):
         """Append an html node and the header node. """
         node = self.ref
         if len(self.converter.doc) != 1 or node is None:
             return
-        html = Element('html')
-        nextnode = node.next
-        while nextnode is not None:
-            if nextnode.name == 'body':
-                break
-            nextnode = nextnode.next
-        head = Element('head')
-        html.append_child(head)
-        if nextnode is None:
-            self.msg('E002', node)
-            head.extend_children(node.parent[node.index+1:])
+        document = node.owner
+        find_element(
+            '#doctype', document, 0, etype=DocumentType, args=['html']
+        )
+        html = find_element('html', document, 1)
+        head = find_element('head', document, insert=False)
+        if head is None:
+            head = find_element('head', html, 0)
         else:
-            head.extend_children(
-                node.parent[node.index+1:nextnode.index]
-            )
-            html.append_child(nextnode)
-        node.parent.append_child(html)
+            html.insert_before(0, head)
+        body = find_element('body', document, insert=False)
+        if body is None:
+            body = find_element('body', html, 1)
+        else:
+            head.extend_children(document[html.index+1:body.index])
+            html.insert_before(1, body)
+        body.extend_children(document[body.parent.index+1:])
 
 
 class UsePackageNC(NodeConverter):
@@ -84,7 +103,14 @@ class UsePackageNC(NodeConverter):
         """Calls the convert function in each of the packages. """
         if len(self.converter.doc) != 1:
             return
-        for src in self.converter.doc[0].namespace['usepackage']:
+        doc = self.converter.doc[0]
+        pkg = doc.meta.get('usepackage', None)
+        if pkg:
+            pkg = [item.strip() for item in pkg.split(',')]
+            doc.namespace['usepackage'][0:0] = pkg
+        for src in doc.namespace['usepackage']:
+            if not src:
+                continue
             try:
                 mod = self.get_module(src)
             except ImportError:
@@ -100,7 +126,6 @@ class UsePackageNC(NodeConverter):
 
 MSG = {
     'E001': 'more than one documentclass node found',
-    'E002': 'missing body node',
     'E100': 'package `{0}` not found',
     'E101': 'package `{0}` does not declare the `convert` function',
     'E102': 'package `{0}` convert function argument count != 2'

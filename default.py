@@ -9,7 +9,7 @@ parsed in html.
 from lexor import init, load_aux
 
 INFO = init(
-    version=(0, 0, 1, 'rc', 8),
+    version=(0, 0, 1, 'rc', 9),
     lang='lexor',
     to_lang='html',
     type='converter',
@@ -40,6 +40,7 @@ REPOSITORY = [
     MOD['latex'].LatexNC,
     MOD['latex'].LatexEnvironNC,
     MOD['list'].ListNC,
+    MOD['meta'].MetaNC,
     MOD['paragraph'].ParagraphNC,
     MOD['python'].PythonNC,
     MOD['quote'].QuoteNC,
@@ -67,6 +68,7 @@ MAPPING = {
     'macro': 'MacroNC',
     'include': 'IncludeNC',
     'documentclass': 'DocumentClassNC',
+    'lexor-meta': 'MetaNC',
 }
 
 
