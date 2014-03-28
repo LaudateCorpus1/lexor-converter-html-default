@@ -16,7 +16,10 @@ class LatexNC(NodeConverter):
     """Adjust the node for mathjax. """
 
     def start(self, node):
-        node.data = self.converter['MacroNC'].eval_text(node.data)
+        try:
+            node.data = self.converter['MacroNC'].eval_text(node.data)
+        except AttributeError:
+            pass
         if node['type'] == 'display':
             node.name = 'script'
             node['type'] = "math/tex; mode=display"
@@ -27,6 +30,8 @@ class LatexNC(NodeConverter):
             del node['char']
         return node
 
+    def end(self, node):
+        node[0].data = self.converter['MacroNC'].eval_text(node[0].data)
 
 class LatexEnvironNC(NodeConverter):
     """Adjust the enviroments. """

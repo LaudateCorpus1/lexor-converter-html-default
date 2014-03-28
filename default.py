@@ -9,7 +9,7 @@ parsed in html.
 from lexor import init, load_aux
 
 INFO = init(
-    version=(0, 0, 1, 'rc', 9),
+    version=(0, 0, 1, 'rc', 10),
     lang='lexor',
     to_lang='html',
     type='converter',
@@ -27,6 +27,7 @@ DEFAULTS = {
 }
 MOD = load_aux(INFO)
 REPOSITORY = [
+    MOD['code'].CodeBlockNC,
     MOD['define'].DefineNC,
     MOD['define'].MacroNC,
     MOD['define'].UndefineNC,
@@ -48,6 +49,7 @@ REPOSITORY = [
     MOD['reference'].ReferenceInlineNC,
 ]
 MAPPING = {
+    'codeblock': 'CodeBlockNC',
     'usepackage': 'UsePackageNC',
     'quoted': 'QuoteNC',
     '#entity': 'EntityNC',
