@@ -9,15 +9,22 @@ parsed in html.
 from lexor import init, load_aux
 
 INFO = init(
-    version=(0, 0, 2, 'rc', 0),
+    version=(0, 0, 3, 'rc', 0),
     lang='lexor',
     to_lang='html',
     type='converter',
     description='Convert lexor files to html.',
-    url='http://jmlopez-rod.github.io/'
-        'lexor-lang/lexor-converter-html-default',
-    author='Manuel Lopez',
-    author_email='jmlopez.rod@gmail.com',
+    git={
+        'host': 'github',
+        'user': 'jmlopez-rod',
+        'repo': 'lexor-converter-html-default'
+    },
+    author={
+        'name': 'Manuel Lopez',
+        'email': 'jmlopez.rod@gmail.com'
+    },
+    docs='http://jmlopez-rod.github.io/'
+         'lexor-lang/lexor-converter-html-default',
     license='BSD License',
     path=__file__
 )

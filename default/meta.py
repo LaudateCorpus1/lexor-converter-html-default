@@ -32,6 +32,6 @@ class MetaNC(NodeConverter):
     def end(self, node):
         for entry in node.child:
             node.owner.meta[entry['name']] = self.handle_data(
-                entry.data, node
+                entry[0].data, node  # TODO: add all the data
             )
         return self.converter.remove_node(node)
