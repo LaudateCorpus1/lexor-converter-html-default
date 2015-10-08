@@ -9,6 +9,8 @@ from lexor.core.writer import replace
 class DefineNC(NodeConverter):
     """Remove the define nodes. """
 
+    directive = 'define'
+
     def end(self, node):
         parent = node.parent
         index = node.index
@@ -25,6 +27,8 @@ class DefineNC(NodeConverter):
 
 class UndefineNC(NodeConverter):
     """Remove the undef nodes. """
+
+    directive = 'undef'
 
     def start(self, node):
         macro = get_converter_namespace()['macro']
@@ -90,6 +94,8 @@ def get_input(text, index):
 
 class MacroNC(NodeConverter):
     """Adjust the node for mathjax. """
+
+    directive = 'macro'
 
     def __init__(self, converter):
         NodeConverter.__init__(self, converter)

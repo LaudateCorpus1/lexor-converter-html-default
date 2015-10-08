@@ -12,6 +12,8 @@ from lexor.core.converter import NodeConverter
 class IncludeNC(NodeConverter):
     """Remove the include nodes. """
 
+    directive = 'include'
+
     @staticmethod
     def get_info(node):
         """Format the node information. """

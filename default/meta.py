@@ -13,6 +13,8 @@ RE = re.compile(r'\$\((.*?)\)')
 class MetaNC(NodeConverter):
     """Attach the entries to the document meta attribute. """
 
+    directive = 'lexor-meta'
+
     @staticmethod
     def handle_data(data, node):
         """Look for sequences of the form `$(variable)` and

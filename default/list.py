@@ -11,6 +11,8 @@ from lexor.core.elements import Element
 class ListNC(NodeConverter):
     """Build a list. """
 
+    directive = 'list'
+
     @staticmethod
     def start_list(ltype):
         """Create a new list element. """

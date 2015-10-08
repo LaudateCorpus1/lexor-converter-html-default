@@ -11,6 +11,8 @@ from lexor.core.elements import Entity
 class QuoteNC(NodeConverter):
     """Wrap child nodes with the proper entity nodes. """
 
+    directive = 'quoted'
+
     def end(self, node):
         if node['char'] == "'":
             lnode = Entity('&lsquo;')

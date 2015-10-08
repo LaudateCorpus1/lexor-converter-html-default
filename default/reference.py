@@ -23,6 +23,8 @@ REF = [
 class ReferenceBlockNC(NodeConverter):
     """Handle references. """
 
+    directive = 'address_reference'
+
     def __init__(self, converter):
         NodeConverter.__init__(self, converter)
         namespace = get_converter_namespace()
@@ -60,6 +62,8 @@ class ReferenceBlockNC(NodeConverter):
 
 class ReferenceInlineNC(NodeConverter):
     """Handle references. """
+
+    directive = 'reference'
 
     def start(self, node):
         self.converter.document.namespace['inline_ref'].append(node)

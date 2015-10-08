@@ -29,6 +29,9 @@ def find_element(name, node, index=0, **keywords):
 
 class DocumentClassNC(NodeConverter):
     """Appends a DocumentType node. """
+
+    directive = 'documentclass'
+
     num = 0
     ref = None
 
@@ -68,6 +71,8 @@ class DocumentClassNC(NodeConverter):
 
 class UsePackageNC(NodeConverter):
     """Loads an external python script. """
+
+    directive = 'usepackage'
 
     def start(self, node):
         pkg = [item.strip() for item in node.data.split(',')]

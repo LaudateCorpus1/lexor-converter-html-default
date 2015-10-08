@@ -9,11 +9,16 @@ from lexor.core.elements import RawText
 
 class LatexPINC(NodeConverter):
     """Remove latex processing instructions. """
+
+    directive = '?latex'
     copy = False
+    remove = True
 
 
 class LatexNC(NodeConverter):
     """Adjust the node for mathjax. """
+
+    directive = 'latex'
 
     def start(self, node):
         try:
@@ -128,6 +133,16 @@ class LatexEnvironNC(NodeConverter):
         node.parent.insert_before(node.index, newnode)
         del node.parent[node.index]
         return newnode
+
+
+class LatexEquationEnvironNC(LatexEnvironNC):
+
+    directive = 'equation'
+
+
+class LatexAlignEnvironNC(LatexEnvironNC):
+
+    directive = 'align'
 
 
 MSG = {

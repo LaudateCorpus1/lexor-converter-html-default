@@ -10,6 +10,9 @@ import lexor.core.elements as core
 
 class FigureNC(NodeConverter):
     """Adjust a figure. """
+
+    directive = 'figure'
+
     num = 0
 
     def end(self, node):

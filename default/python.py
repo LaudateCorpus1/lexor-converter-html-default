@@ -11,6 +11,8 @@ from lexor.core.parser import Parser
 class PythonNC(NodeConverter):
     """Execute python embeddings. """
 
+    directive = '?python'
+
     def __init__(self, converter):
         NodeConverter.__init__(self, converter)
         self.parser = Parser('html', 'default')

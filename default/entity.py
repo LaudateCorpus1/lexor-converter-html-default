@@ -9,6 +9,9 @@ from lexor.core.converter import NodeConverter
 
 class EntityNC(NodeConverter):
     """Replace special symbols. """
+
+    directive = '#entity'
+
     val = {
         "'": '&rsquo;',
         "<": '&lt;'

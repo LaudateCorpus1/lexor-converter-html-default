@@ -7,6 +7,28 @@ parsed in html.
 """
 
 from lexor import init, load_aux
+from lexor.core.converter import NodeConverter
+
+
+class BaseConverter(NodeConverter):
+
+    template_parser = {
+        'lang': 'lexor',
+        'style': '_',
+        'defaults': {
+            'inline': 'on'
+        }
+    }
+
+
+class LXRemoveWrapNC(BaseConverter):
+
+    directive = 'lx-remove-wrap'
+    restrict = 'A'
+    template = '<target/>'
+    auto_transclude = 'target'
+    replace = True
+
 
 INFO = init(
     version=(0, 0, 3, 'rc', 0),
@@ -34,6 +56,8 @@ DEFAULTS = {
 }
 MOD = load_aux(INFO)
 REPOSITORY = [
+    LXRemoveWrapNC,
+    MOD['code'].InlineCodeNC,
     MOD['code'].CodeBlockNC,
     MOD['define'].DefineNC,
     MOD['define'].MacroNC,
@@ -44,41 +68,18 @@ REPOSITORY = [
     MOD['figure'].FigureNC,
     MOD['include'].IncludeNC,
     MOD['inline'].StrongEmNC,
+    MOD['inline'].EmStrongNC,
     MOD['latex'].LatexPINC,
     MOD['latex'].LatexNC,
-    MOD['latex'].LatexEnvironNC,
+    MOD['latex'].LatexEquationEnvironNC,
+    MOD['latex'].LatexAlignEnvironNC,
     MOD['list'].ListNC,
     MOD['meta'].MetaNC,
-    MOD['paragraph'].ParagraphNC,
     MOD['python'].PythonNC,
     MOD['quote'].QuoteNC,
     MOD['reference'].ReferenceBlockNC,
     MOD['reference'].ReferenceInlineNC,
 ]
-MAPPING = {
-    'codeblock': 'CodeBlockNC',
-    'usepackage': 'UsePackageNC',
-    'quoted': 'QuoteNC',
-    '#entity': 'EntityNC',
-    '?python': 'PythonNC',
-    '?latex': 'LatexPINC',
-    'strong_em': 'StrongEmNC',
-    'em_strong': 'StrongEmNC',
-    'p': 'ParagraphNC',
-    'list': 'ListNC',
-    'address_reference': 'ReferenceBlockNC',
-    'reference': 'ReferenceInlineNC',
-    'latex': 'LatexNC',
-    'equation': 'LatexEnvironNC',
-    'align': 'LatexEnvironNC',
-    'figure': 'FigureNC',
-    'define': 'DefineNC',
-    'undef': 'UndefineNC',
-    'macro': 'MacroNC',
-    'include': 'IncludeNC',
-    'documentclass': 'DocumentClassNC',
-    'lexor-meta': 'MetaNC',
-}
 
 
 def init_conversion(converter, doc):
