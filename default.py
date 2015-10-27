@@ -75,11 +75,20 @@ REPOSITORY = [
     MOD['latex'].LatexAlignEnvironNC,
     MOD['list'].ListNC,
     MOD['meta'].MetaNC,
-    MOD['python'].PythonNC,
+    MOD['meta'].MetaEntryNC,
+    MOD['meta'].MetaItemNC,
     MOD['quote'].QuoteNC,
     MOD['reference'].ReferenceBlockNC,
     MOD['reference'].ReferenceInlineNC,
 ]
+
+
+def pre_process(converter, doc):
+    pass
+
+
+def post_process(converter, doc):
+    pass
 
 
 def init_conversion(converter, doc):
