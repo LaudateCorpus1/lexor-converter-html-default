@@ -3,9 +3,11 @@
 Fixes the references.
 
 """
-
-from lexor.core.converter import NodeConverter, get_converter_namespace
+from lexor.util import Position
 import lexor.core.elements as core
+from lexor.core.converter import (
+    NodeConverter, get_converter_namespace
+)
 
 REF = [
     'chap', 'c',
@@ -23,51 +25,75 @@ REF = [
 class ReferenceBlockNC(NodeConverter):
     """Handle references. """
 
-    directive = 'address_reference'
+    directive = 'lx:address-reference'
+    remove = 'compile'
 
     def __init__(self, converter):
         NodeConverter.__init__(self, converter)
-        namespace = get_converter_namespace()
-        if 'block_ref' not in namespace:
-            namespace['block_ref'] = dict()
+        namespace = converter.root_document.namespace
+        if 'lx:address-reference' not in namespace:
+            namespace['lx:address-reference'] = dict()
+        self.namespace = namespace
 
-    def start(self, node):
-        block_ref = get_converter_namespace()['block_ref']
-        refname = node['_reference_name']
-        if refname in block_ref:
-            pos1 = node['_pos']
-            pos2 = block_ref[refname]['_pos']
+    def compile(self, node, dir_info, t_node, required):
+        namespace = self.namespace
+        ref = namespace['lx:address-reference']
+        ref_name = node['_reference-name']
+        if ref_name in ref:
             self.msg(
                 'E001', node, (
-                    refname, pos1[0], pos1[1], pos2[0], pos2[1]
+                    ref_name,
+                    Position(ref[ref_name].node_position)
                 )
             )
-        block_ref[refname] = node
-        parent = node.parent
-        index = node.index
-        del node.parent[node.index]
-        try:
-            if index - 1 > -1:
-                return parent[index-1]
-            else:
-                raise IndexError
-        except IndexError:
-            parent.append_child('')
-        return parent[0]
+        ref[ref_name] = node
 
-    def __getitem__(self, refname):
+    def __getitem__(self, ref_name):
         """Return a node containing the reference. """
-        return get_converter_namespace()['block_ref'][refname]
+        ref = self.namespace['lx:address-reference']
+        return ref[ref_name]
 
 
 class ReferenceInlineNC(NodeConverter):
     """Handle references. """
 
-    directive = 'reference'
+    directive = 'lx:reference'
 
-    def start(self, node):
-        self.converter.document.namespace['inline_ref'].append(node)
-        return node
+    def pre_link(self, node, dir_info, trans_ele, required):
+        ref_block_nc = self.converter['ReferenceBlockNC']
+        doc_level = len(self.converter.doc)
+        tex_ref = None
+        node['_address'] = ''
+        if '_reference_id' in node:
+            update = self.update_node(
+                node, ref_block_nc, '_reference_id'
+            )
+            if update or doc_level == 1:
+                del node['_reference_id']
+        else:
+            if isinstance(node, core.Void):
+                update = self.update_node(
+                    node, ref_block_nc, 'alt'
+                )
+            else:
+                if len(node) == 1 and node[0].name == '#text':
+                    update = self.update_node(
+                        node, ref_block_nc, node[0].data
+                    )
+                    if isinstance(update, str):
+                        tex_ref = core.RawText('script', update)
+                        tex_ref['type'] = "math/tex"
+                elif doc_level > 1:
+                    update = False
+                else:
+                    self.msg('E101', node)
+        if doc_level > 1 and update is False:
+            if 'uri' not in node:
+                node['uri'] = node.owner.uri
+            # namespace = self.converter.doc[-2].namespace
+            # namespace['inline_ref'].append(node)
+            return
+        self.rename(node, tex_ref)
 
     @staticmethod
     def format_latex_ref(key):
@@ -89,7 +115,7 @@ class ReferenceInlineNC(NodeConverter):
                     template = 'Fig.%s'
                 else:
                     template = '%s'
-        template = template % "\\%s{%s}"
+        template %= "\\%s{%s}"
         return template % (ref_type, key)
 
     def update_node(self, node, ref_block_nc, key):
@@ -108,14 +134,10 @@ class ReferenceInlineNC(NodeConverter):
             except KeyError:
                 if len(self.converter.doc) > 1:
                     return False
-                self.msg(
-                    'E100', node, (
-                        key, node['_pos'][0], node['_pos'][1]
-                    )
-                )
+                self.msg('E100', node, [key])
         else:
             node['_address'] = ref['_address']
-            for item in ref:
+            for item in ref.attributes:
                 if item[0] != '_':
                     node[item] = ref[item]
         return True
@@ -123,7 +145,6 @@ class ReferenceInlineNC(NodeConverter):
     @staticmethod
     def rename(node, tex_ref):
         """Final stage in the conversion. """
-        del node['_pos']
         if tex_ref is not None:
             node.parent.insert_before(node.index, tex_ref)
             del node.parent[node.index]
@@ -134,60 +155,16 @@ class ReferenceInlineNC(NodeConverter):
             node.name = 'a'
             node.rename('_address', 'href')
 
-    def convert(self):
-        """Modifies the nodes caught by this node converter. """
-        ref_block_nc = self.converter['ReferenceBlockNC']
-        inline_ref = self.converter.document.namespace['inline_ref']
-        doc_level = len(self.converter.doc)
-        for node in inline_ref:
-            tex_ref = None
-            node['_address'] = ''
-            if '_reference_id' in node:
-                update = self.update_node(
-                    node, ref_block_nc, '_reference_id'
-                )
-                if update or doc_level == 1:
-                    del node['_reference_id']
-            else:
-                if isinstance(node, core.Void):
-                    update = self.update_node(
-                        node, ref_block_nc, 'alt'
-                    )
-                else:
-                    if len(node) == 1 and node[0].name == '#text':
-                        update = self.update_node(
-                            node, ref_block_nc, node[0].data
-                        )
-                        if isinstance(update, str):
-                            tex_ref = core.RawText('script', update)
-                            tex_ref['type'] = "math/tex"
-                    elif doc_level > 1:
-                        update = False
-                    else:
-                        self.msg(
-                            'E101', node, (
-                                node['_pos'][0], node['_pos'][1]
-                            )
-                        )
-            if doc_level > 1 and update is False:
-                if 'uri' not in node:
-                    node['uri'] = node.owner.uri
-                namespace = self.converter.doc[-2].namespace
-                namespace['inline_ref'].append(node)
-                continue
-            self.rename(node, tex_ref)
-
 
 MSG = {
-    'E001': '`{0}` at {1}:{2:2} already defined at {3}:{4:2}',
-    'E100': 'undefined reference `{0}` at {1}:{2:2}',
-    'E101': 'implicit link at {0}:{1:2} contains elements',
+    'E001': '`{0}` already defined at {1}',
+    'E100': 'undefined reference `{0}`',
+    'E101': 'implicit link contains elements',
 }
 MSG_EXPLANATION = [
     """
     - Address references can only be defined once. 'E001' tells you
-      the location of where it was first defined and the location
-      where you are trying to redefine it.
+      the location of where it was first defined.
 
     Okay:
         [1]: http://google.com

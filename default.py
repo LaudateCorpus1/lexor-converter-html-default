@@ -7,7 +7,8 @@ parsed in html.
 """
 
 from lexor import init, load_aux
-from lexor.core.converter import NodeConverter
+from lexor.core.converter import NodeConverter, \
+    get_converter_namespace
 
 
 class BaseConverter(NodeConverter):
@@ -93,13 +94,11 @@ def post_process(converter, doc):
 
 def init_conversion(converter, doc):
     """Initialiazing the conversion of a document. """
-    doc.namespace['inline_ref'] = list()
     if 'usepackage' not in converter.doc[0].namespace:
         converter.doc[0].namespace['usepackage'] = list()
 
 
 def convert(converter, _):
     """Evaluate the python embeddings. """
-    converter['ReferenceInlineNC'].convert()
     converter['DocumentClassNC'].convert()
     converter['UsePackageNC'].convert()
