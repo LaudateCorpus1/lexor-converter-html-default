@@ -2,7 +2,7 @@
 
 """
 
-from lexor.core.converter import NodeConverter, get_converter_namespace
+from lexor.core.converter import NodeConverter
 from lexor.core.writer import replace
 
 
@@ -99,9 +99,9 @@ class MacroNC(NodeConverter):
 
     def __init__(self, converter):
         NodeConverter.__init__(self, converter)
-        namespace = get_converter_namespace()
-        if 'macro' not in namespace:
-            namespace['macro'] = dict()
+        # namespace = get_converter_namespace()
+        # if 'macro' not in namespace:
+        #     namespace['macro'] = dict()
 
     @classmethod
     def handle_braces(cls, char, text, index):

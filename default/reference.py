@@ -6,7 +6,7 @@ Fixes the references.
 from lexor.util import Position
 import lexor.core.elements as core
 from lexor.core.converter import (
-    NodeConverter, get_converter_namespace
+    NodeConverter
 )
 
 REF = [

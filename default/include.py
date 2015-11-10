@@ -26,9 +26,9 @@ class IncludeNC(NodeConverter):
             'convert_to': 'html',
             'convert_defaults': None,
             'adopt': True,
-            'convert': 'true'
+            'convert': 'false'
         }
-        for att in node:
+        for att in node.attributes:
             info[att] = node[att]
         if info['src'][0] != '/':
             base = os.path.dirname(node.owner.uri_)
@@ -70,9 +70,9 @@ class IncludeNC(NodeConverter):
                 pass
         return None
 
-    def start(self, node):
+    def compile(self, node, dir_info, t_node, required):
         if 'src' not in node:
-            return Converter.remove_node(node)
+            return self.msg('E000', node)
         info = self.get_info(node)
         text = self.get_text(info, node)
         if text is None:
@@ -121,6 +121,7 @@ class IncludeNC(NodeConverter):
             cdoc = parser.doc
             clog = None
         self.update_log(parser.log, clog)
+        self.converter.compile(cdoc)
         if info['adopt']:
             cdoc.temporary = True
             node.parent.extend_before(node.index, cdoc)
@@ -131,6 +132,7 @@ class IncludeNC(NodeConverter):
 
 
 MSG = {
+    'E000': 'no `src` attribute found',
     'E001': 'file `{0}` not found',
     'E002': 'parsing style not found {0}:{1}',
     'E003': 'converting style not found [{0} ==> {1}:{2}]',

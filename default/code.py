@@ -27,8 +27,7 @@ class InlineCodeNC(MOD.BaseConverter):
 
     directive = 'code'
 
-    def pre_link(self, **info):
-        node = info['node']
+    def post_link(self, node, dir_info, trans_ele, required):
         node[0].data = replace(
             node[0].data,
             ('<', '&lt;'),

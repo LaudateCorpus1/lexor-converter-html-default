@@ -1,35 +1,13 @@
 """LEXOR to HTML DEFAULT Converter Style
 
 Converts a lexor file to a valid html file. Note that when using
-python embeddings, everything outputed by the print statement will be
+python embeddings, everything outputted by the print statement will be
 parsed in html.
 
 """
 
-from lexor import init, load_aux
-from lexor.core.converter import NodeConverter, \
-    get_converter_namespace
-
-
-class BaseConverter(NodeConverter):
-
-    template_parser = {
-        'lang': 'lexor',
-        'style': '_',
-        'defaults': {
-            'inline': 'on'
-        }
-    }
-
-
-class LXRemoveWrapNC(BaseConverter):
-
-    directive = 'lx-remove-wrap'
-    restrict = 'A'
-    template = '<target/>'
-    auto_transclude = 'target'
-    replace = True
-
+from lexor import init
+from lexor.core.converter import NodeConverter
 
 INFO = init(
     version=(0, 0, 3, 'rc', 0),
@@ -55,33 +33,27 @@ DEFAULTS = {
     'error': 'on',
     'exec': 'on',
 }
-MOD = load_aux(INFO)
-REPOSITORY = [
-    LXRemoveWrapNC,
-    MOD['code'].InlineCodeNC,
-    MOD['code'].CodeBlockNC,
-    MOD['define'].DefineNC,
-    MOD['define'].MacroNC,
-    MOD['define'].UndefineNC,
-    MOD['document'].DocumentClassNC,
-    MOD['document'].UsePackageNC,
-    MOD['entity'].EntityNC,
-    MOD['figure'].FigureNC,
-    MOD['include'].IncludeNC,
-    MOD['inline'].StrongEmNC,
-    MOD['inline'].EmStrongNC,
-    MOD['latex'].LatexPINC,
-    MOD['latex'].LatexNC,
-    MOD['latex'].LatexEquationEnvironNC,
-    MOD['latex'].LatexAlignEnvironNC,
-    MOD['list'].ListNC,
-    MOD['meta'].MetaNC,
-    MOD['meta'].MetaEntryNC,
-    MOD['meta'].MetaItemNC,
-    MOD['quote'].QuoteNC,
-    MOD['reference'].ReferenceBlockNC,
-    MOD['reference'].ReferenceInlineNC,
-]
+
+
+class BaseConverter(NodeConverter):
+
+    directive = 'lx:base-converter'
+    template_parser = {
+        'lang': 'lexor',
+        'style': '_',
+        'defaults': {
+            'inline': 'on'
+        }
+    }
+
+
+class LXRemoveWrapNC(BaseConverter):
+
+    directive = 'lx:remove-wrap'
+    restrict = 'A'
+    template = '<target/>'
+    auto_transclude = 'target'
+    replace = True
 
 
 def pre_process(converter, doc):
@@ -90,15 +62,3 @@ def pre_process(converter, doc):
 
 def post_process(converter, doc):
     pass
-
-
-def init_conversion(converter, doc):
-    """Initialiazing the conversion of a document. """
-    if 'usepackage' not in converter.doc[0].namespace:
-        converter.doc[0].namespace['usepackage'] = list()
-
-
-def convert(converter, _):
-    """Evaluate the python embeddings. """
-    converter['DocumentClassNC'].convert()
-    converter['UsePackageNC'].convert()

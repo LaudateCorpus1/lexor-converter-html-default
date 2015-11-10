@@ -4,7 +4,7 @@ Node writer description.
 
 """
 
-from lexor.core.converter import NodeConverter, get_converter_namespace
+from lexor.core.converter import NodeConverter
 import lexor.core.elements as core
 
 

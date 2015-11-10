@@ -3,7 +3,6 @@
 """
 
 from lexor.core.converter import NodeConverter
-from lexor.core.converter import get_converter_namespace
 from lexor.core.elements import RawText
 
 
@@ -43,9 +42,9 @@ class LatexEnvironNC(NodeConverter):
 
     def __init__(self, converter):
         NodeConverter.__init__(self, converter)
-        namespace = get_converter_namespace()
-        if 'latex_labels' not in namespace:
-            namespace['latex_labels'] = list()
+        # namespace = get_converter_namespace()
+        # if 'latex_labels' not in namespace:
+        #     namespace['latex_labels'] = list()
         self.handle = {
             'equation': self.handle_equation,
             'align': self.handle_align,
