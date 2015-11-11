@@ -127,10 +127,11 @@ class ReferenceInlineNC(NodeConverter):
             ref = ref_block_nc[key]
         except KeyError:
             try:
-                if key in get_converter_namespace()['latex_labels']:
-                    return self.format_latex_ref(key)
-                else:
-                    raise KeyError
+                pass
+                # if key in get_converter_namespace()['latex_labels']:
+                #     return self.format_latex_ref(key)
+                # else:
+                #     raise KeyError
             except KeyError:
                 if len(self.converter.doc) > 1:
                     return False

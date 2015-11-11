@@ -73,11 +73,23 @@ class UsePackageNC(NodeConverter):
     """Loads an external python script. """
 
     directive = 'usepackage'
+    remove = True
 
-    def start(self, node):
-        pkg = [item.strip() for item in node.data.split(',')]
-        self.converter.doc[0].namespace['usepackage'].extend(pkg)
-        return self.converter.remove_node(node)
+    def compile(self, node, dir_info, t_node, required):
+        self.use_package(node.data, node)
+
+    def use_package(self, name, node):
+        """Load the package. """
+        try:
+            mod = self.get_module(name)
+        except ImportError:
+            return self.msg('E100', node, [name])
+        try:
+            repo = mod.REPOSITORY
+        except AttributeError:
+            repo = self.converter.find_node_converters(mod)
+        for nc_class in repo:
+            self.converter.register(nc_class)
 
     def get_module(self, src):
         """Load the module specified by name. """
@@ -104,36 +116,10 @@ class UsePackageNC(NodeConverter):
                         return load_source(modname, path)
                 raise ImportError
 
-    def convert(self):
-        """Calls the convert function in each of the packages. """
-        if len(self.converter.doc) != 1:
-            return
-        doc = self.converter.doc[0]
-        pkg = doc.meta.get('usepackage', None)
-        if pkg:
-            pkg = [item.strip() for item in pkg.split(',')]
-            doc.namespace['usepackage'][0:0] = pkg
-        for src in doc.namespace['usepackage']:
-            if not src:
-                continue
-            try:
-                mod = self.get_module(src)
-            except ImportError:
-                self.msg('E100', None, [src])
-                continue
-            if hasattr(mod, 'convert'):
-                if mod.convert.func_code.co_argcount == 2:
-                    mod.convert(self.converter, self.converter.doc[0])
-                else:
-                    self.msg('E102', None, [src])
-            else:
-                self.msg('E101', None, [src])
 
 MSG = {
     'E001': 'more than one documentclass node found',
     'E100': 'package `{0}` not found',
-    'E101': 'package `{0}` does not declare the `convert` function',
-    'E102': 'package `{0}` convert function argument count != 2'
 }
 MSG_EXPLANATION = [
     """
@@ -144,19 +130,20 @@ MSG_EXPLANATION = [
     - Make sure the body node is declared when using the
       documentclass node.
 
-    Reports error E001 and E002.
+    Reports error E001.
 
 """,
     """
     - A "lexor" package is a python script which declares the
-      function convert with two arguments: converter and document.
+      one or several node converters and optionally a post_process
+      function.
 
     - If the package is not found in the same directory as the
       document or some relative location to the document then it it
-      searches in each of the paths declared by the enviroment
+      searches in each of the paths declared by the environment
       variable `LEXORINPUTS`.
 
-    Reports error E100, E101 and E102.
+    Reports error E100.
 
 """,
 ]

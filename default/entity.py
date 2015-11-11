@@ -14,10 +14,11 @@ class EntityNC(NodeConverter):
 
     val = {
         "'": '&rsquo;',
-        "<": '&lt;'
+        "<": '&lt;',
+        '&': '&amp;',
     }
 
-    def start(self, node):
+    def compile(self, node, dir_info, t_node, required):
         if node.data[0] == '\\':
             node.data = node.data[1:]
         if node.data in self.val:
