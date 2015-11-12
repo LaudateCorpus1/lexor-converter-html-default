@@ -83,7 +83,15 @@ class MetaItemNC(NodeConverter):
         if not isinstance(node, RawText):
             return self.msg('E100', node)
         item = handle_data(node.data, node.owner.meta)
-        node.owner.meta[entry['name']].append(item)
+        entry_name = entry['name']
+        node.owner.meta[entry_name].append(item)
+        if entry_name == 'usepackage':
+            node_trans = self.converter['UsePackageNC']
+            names = [i.strip() for i in item.split(',')]
+            for pkg in names:
+                if pkg:
+                    node_trans.use_package(pkg, node)
+
 
 
 MSG = {
