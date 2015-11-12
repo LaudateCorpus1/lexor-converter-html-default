@@ -31,25 +31,22 @@ class DocumentClassNC(NodeConverter):
     """Appends a DocumentType node. """
 
     directive = 'documentclass'
+    remove = 'post_link'
 
-    num = 0
-    ref = None
-
-    def start(self, node):
-        self.num += 1
-        if self.num > 1:
+    def compile(self, node, dir_info, t_node, required):
+        scope = self.converter.root_document.namespace
+        if 'documentclass_count' not in scope:
+            scope['documentclass_count'] = 0
+        scope['documentclass_count'] += 1
+        if scope['documentclass_count'] > 1:
             self.msg('E001', node)
-        document = node.owner
-        self.ref = find_element(
-            '#doctype', document, 0, etype=DocumentType, args=['html']
+        doc = node.owner
+        find_element(
+            '#doctype', doc, 0, etype=DocumentType, args=['html']
         )
-        return self.converter.remove_node(node)
 
-    def convert(self):
+    def post_link(self, node, dir_info, trans_ele, required):
         """Append an html node and the header node. """
-        node = self.ref
-        if len(self.converter.doc) != 1 or node is None:
-            return
         document = node.owner
         find_element(
             '#doctype', document, 0, etype=DocumentType, args=['html']
