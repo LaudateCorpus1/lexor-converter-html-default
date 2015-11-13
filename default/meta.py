@@ -86,12 +86,11 @@ class MetaItemNC(NodeConverter):
         entry_name = entry['name']
         node.owner.meta[entry_name].append(item)
         if entry_name == 'usepackage':
-            node_trans = self.converter['UsePackageNC']
+            trans = self.converter
             names = [i.strip() for i in item.split(',')]
             for pkg in names:
                 if pkg:
-                    node_trans.use_package(pkg, node)
-
+                    trans.load_package(pkg, node)
 
 
 MSG = {

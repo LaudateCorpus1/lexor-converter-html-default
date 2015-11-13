@@ -73,50 +73,11 @@ class UsePackageNC(NodeConverter):
     remove = True
 
     def compile(self, node, dir_info, t_node, required):
-        self.use_package(node.data, node)
-
-    def use_package(self, name, node):
-        """Load the package. """
-        try:
-            mod = self.get_module(name)
-        except ImportError:
-            return self.msg('E100', node, [name])
-        try:
-            repo = mod.REPOSITORY
-        except AttributeError:
-            repo = self.converter.find_node_converters(mod)
-        for nc_class in repo:
-            self.converter.register(nc_class)
-
-    def get_module(self, src):
-        """Load the module specified by name. """
-        name = os.path.basename(src)
-        name = os.path.splitext(name)[0]
-        if src[0] != '/':
-            base = os.path.dirname(self.converter.doc[0].uri_)
-            if base != '':
-                base += '/'
-            path = '%s%s' % (base, src)
-            if not path.endswith('.py'):
-                path += '.py'
-            try:
-                return load_source('lexor-package_%s' % name, path)
-            except IOError:
-                try:
-                    lexorinputs = os.environ['LEXORINPUTS']
-                except KeyError:
-                    raise ImportError
-                for directory in lexorinputs.split(':'):
-                    path = '%s/%s.py' % (directory, name)
-                    if os.path.exists(path):
-                        modname = 'lexor-package_%s' % name
-                        return load_source(modname, path)
-                raise ImportError
+        self.converter.load_package(node.data, node)
 
 
 MSG = {
     'E001': 'more than one documentclass node found',
-    'E100': 'package `{0}` not found',
 }
 MSG_EXPLANATION = [
     """
@@ -128,19 +89,6 @@ MSG_EXPLANATION = [
       documentclass node.
 
     Reports error E001.
-
-""",
-    """
-    - A "lexor" package is a python script which declares the
-      one or several node converters and optionally a post_process
-      function.
-
-    - If the package is not found in the same directory as the
-      document or some relative location to the document then it it
-      searches in each of the paths declared by the environment
-      variable `LEXORINPUTS`.
-
-    Reports error E100.
 
 """,
 ]
