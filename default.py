@@ -5,8 +5,7 @@ python embeddings, everything outputted by the print statement will be
 parsed in html.
 
 """
-
-from lexor import init
+from lexor import init, load_aux
 from lexor.core.converter import NodeConverter
 
 INFO = init(
@@ -62,3 +61,6 @@ def pre_process(converter, doc):
 
 def post_process(converter, doc):
     pass
+
+
+MOD = load_aux(INFO)

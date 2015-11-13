@@ -12,6 +12,7 @@ class ListNC(NodeConverter):
     """Build a list. """
 
     directive = 'list'
+    remove = 'post_link'
 
     @staticmethod
     def start_list(ltype):
@@ -40,7 +41,7 @@ class ListNC(NodeConverter):
             crt = crt[-1][-1]
             level += 1
         crt[-1].extend_children(item)
-        for key in item:
+        for key in item.attributes:
             if key.startswith('__'):
                 crt[key[2:]] = item[key]
             elif key.startswith('_'):
@@ -67,7 +68,7 @@ class ListNC(NodeConverter):
                         level -= 1
                     crt.append_child(Element('li'))
             crt[-1].extend_children(item)
-            for key in item:
+            for key in item.attributes:
                 if key.startswith('__'):
                     crt[key[2:]] = item[key]
                 elif key.startswith('_'):
@@ -76,9 +77,7 @@ class ListNC(NodeConverter):
         del main[:]
         return list_node
 
-    def end(self, node):
+    def post_link(self, node, dir_info, trans_ele, required):
         """Modifies the nodes caught by this node converter. """
         list_node = ListNC.make_list(node)
         node.parent.insert_before(node.index, list_node)
-        del node.parent[node.index]
-        return list_node
