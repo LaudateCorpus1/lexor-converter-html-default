@@ -3,11 +3,10 @@
 Convert the `strong_em` and `em_strong` tags to proper html nodes.
 
 """
-from lexor import style_reference
-MOD = style_reference(lang='lexor', to_lang='html')
+from lexor.core.converter import NodeConverter
 
 
-class StrongEmNC(MOD.BaseConverter):
+class StrongEmNC(NodeConverter):
     """Replace 'strong_em' by the tags 'strong' and 'em'. """
 
     directive = 'strong_em'
@@ -16,7 +15,7 @@ class StrongEmNC(MOD.BaseConverter):
     auto_transclude = 'target'
 
 
-class EmStrongNC(MOD.BaseConverter):
+class EmStrongNC(NodeConverter):
     """Replace 'strong_em' by the tags 'em' and 'strong'. """
 
     directive = 'em_strong'

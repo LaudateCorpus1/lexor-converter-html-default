@@ -1,12 +1,11 @@
 """LEXOR to HTML CODE NodeConverter
 
 """
-from lexor import style_reference
+from lexor.core.converter import NodeConverter
 from lexor.core import replace
-MOD = style_reference(lang='lexor', to_lang='html')
 
 
-class CodeBlockNC(MOD.BaseConverter):
+class CodeBlockNC(NodeConverter):
     """Change to pre. There will be more options, for now
     we just need a quick way of writing code blocks. """
 
@@ -23,7 +22,7 @@ class CodeBlockNC(MOD.BaseConverter):
         return node
 
 
-class InlineCodeNC(MOD.BaseConverter):
+class InlineCodeNC(NodeConverter):
 
     directive = 'code'
 
