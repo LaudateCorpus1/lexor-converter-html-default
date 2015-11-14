@@ -15,7 +15,6 @@ class EntityNC(NodeConverter):
     val = {
         "'": '&rsquo;',
         "<": '&lt;',
-        '&': '&amp;',
     }
 
     def compile(self, node, dir_info, t_node, required):

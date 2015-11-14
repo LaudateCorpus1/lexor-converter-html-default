@@ -10,19 +10,7 @@ class DefineNC(NodeConverter):
     """Remove the define nodes. """
 
     directive = 'define'
-
-    def end(self, node):
-        parent = node.parent
-        index = node.index
-        del node.parent[node.index]
-        try:
-            if index - 1 > -1:
-                return parent[index-1]
-            else:
-                raise IndexError
-        except IndexError:
-            parent.append_child('')
-        return parent[0]
+    remove = 'post_link'
 
 
 class UndefineNC(NodeConverter):
@@ -30,8 +18,8 @@ class UndefineNC(NodeConverter):
 
     directive = 'undef'
 
-    def start(self, node):
-        macro = get_converter_namespace()['macro']
+    def pre_link(self, node, dir_info, trans_ele, required):
+        macro = self.converter.root_document.namespace['macro']
         if 'class' in node and 'clear' in node['class']:
             keys = macro.keys()
             for key in keys:
@@ -41,17 +29,6 @@ class UndefineNC(NodeConverter):
         for item in data:
             if item in macro:
                 del macro[item]
-        parent = node.parent
-        index = node.index
-        del node.parent[node.index]
-        try:
-            if index - 1 > -1:
-                return parent[index-1]
-            else:
-                raise IndexError
-        except IndexError:
-            parent.append_child('')
-        return parent[0]
 
     @staticmethod
     def convert(converter):
@@ -99,9 +76,9 @@ class MacroNC(NodeConverter):
 
     def __init__(self, converter):
         NodeConverter.__init__(self, converter)
-        # namespace = get_converter_namespace()
-        # if 'macro' not in namespace:
-        #     namespace['macro'] = dict()
+        namespace = converter.root_document.namespace
+        if 'macro' not in namespace:
+            namespace['macro'] = dict()
 
     @classmethod
     def handle_braces(cls, char, text, index):
@@ -137,7 +114,7 @@ class MacroNC(NodeConverter):
 
     def handle_token(self, text, token, new_text, index):
         """Helper function for eval_text. """
-        macro = get_converter_namespace()['macro']
+        macro = self.converter.root_document.namespace['macro']
         char = text[index]
         if token in macro:
             node = macro[token]
@@ -156,7 +133,7 @@ class MacroNC(NodeConverter):
 
     def eval_text(self, text):
         """Perform replacement on text. """
-        macro = get_converter_namespace()['macro']
+        macro = self.converter.root_document.namespace['macro']
         new_text = ''
         token = ''
         command = False
@@ -191,8 +168,8 @@ class MacroNC(NodeConverter):
             new_text += token
         return new_text
 
-    def start(self, node):
+    def pre_link(self, node, dir_info, trans_ele, required):
         if node['flag'] == 'set':
             node['value'] = self.eval_text(node['value'])
-        get_converter_namespace()['macro'][node['name']] = node
+        self.converter.root_document.namespace['macro'][node['name']] = node
         return node

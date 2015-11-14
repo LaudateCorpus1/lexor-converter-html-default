@@ -12,8 +12,9 @@ class QuoteNC(NodeConverter):
     """Wrap child nodes with the proper entity nodes. """
 
     directive = 'quoted'
+    remove = 'post_link'
 
-    def end(self, node):
+    def post_link(self, node, dir_info, trans_ele, required):
         if node['char'] == "'":
             lnode = Entity('&lsquo;')
             newnode = Entity('&rsquo;')
@@ -23,5 +24,4 @@ class QuoteNC(NodeConverter):
         node.parent.insert_before(node.index, lnode)
         node.parent.insert_before(node.index, newnode)
         newnode.parent.extend_before(newnode.index, node)
-        del node.parent[node.index]
-        return newnode
+

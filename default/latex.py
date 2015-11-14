@@ -19,43 +19,42 @@ class LatexNC(NodeConverter):
 
     directive = 'latex'
 
-    def start(self, node):
+    def pre_link(self, node, dir_info, t_node, required):
         try:
             node.data = self.converter['MacroNC'].eval_text(node.data)
         except AttributeError:
             pass
+        node.name = 'script'
         if node['type'] == 'display':
-            node.name = 'script'
             node['type'] = "math/tex; mode=display"
-            del node['char']
         else:
-            node.name = 'script'
             node['type'] = "math/tex"
+        if 'char' in node:
             del node['char']
-        return node
 
-    def end(self, node):
-        node[0].data = self.converter['MacroNC'].eval_text(node[0].data)
+    def post_link(self, node, dir_info, trans_ele, required):
+        pass
+        #node[0].data = self.converter['MacroNC'].eval_text(node[0].data)
 
 class LatexEnvironNC(NodeConverter):
     """Adjust the enviroments. """
 
     def __init__(self, converter):
         NodeConverter.__init__(self, converter)
-        # namespace = get_converter_namespace()
-        # if 'latex_labels' not in namespace:
-        #     namespace['latex_labels'] = list()
+        namespace = converter.root_document.namespace
+        if 'latex_labels' not in namespace:
+            namespace['latex_labels'] = list()
         self.handle = {
             'equation': self.handle_equation,
             'align': self.handle_align,
         }
 
-    def end(self, node):
+    def post_link(self, node, dir_info, trans_ele, required):
         return self.handle[node.name](node)
 
     def handle_label(self, node):
         """Collect labels. """
-        latex_labels = get_converter_namespace()['latex_labels']
+        latex_labels = self.converter.root_document.namespace()['latex_labels']
         if node['id'] in latex_labels:
             self.msg('E001', node, [node['id']])
         else:

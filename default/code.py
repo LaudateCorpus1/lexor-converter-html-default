@@ -12,7 +12,7 @@ class CodeBlockNC(MOD.BaseConverter):
 
     directive = 'codeblock'
 
-    def end(self, node):
+    def post_link(self, node, dir_info, trans_ele, required):
         node.name = 'pre'
         node[0].data = replace(
             node[0].data,
